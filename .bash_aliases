@@ -1,0 +1,7 @@
+alias ksgp="kubectl -n kube-system get pods"
+alias kgp="kubectl get pods"
+alias ks="kubectl -n kube-system"
+alias k="kubectl"
+alias kg="kubectl get"
+alias ksg="kubectl -n kube-system get"
+alias kcf="kubectl create -f"

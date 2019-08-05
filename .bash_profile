@@ -213,6 +213,7 @@ alias pping='prettyping --nolegend'
 alias preview="fzf --preview 'bat --color \"always\" {}'"
 alias showFiles='defaults write com.apple.finder AppleShowAllFiles YES; killall Finder /System/Library/CoreServices/Finder.app'
 alias sshpass='ssh -o PreferredAuthentications=password -o PubkeyAuthentication=no'
+alias subl='/Applications/Sublime Text.app/Contents/SharedSupport/bin/subl'
 
 
 #-------------------------------------------------------------------------------

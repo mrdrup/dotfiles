@@ -6,7 +6,7 @@ export GBT_CAR_DIR_FORMAT='{{ Dir }}'
 
 export GBT_CAR_GIT_FG='220'
 export GBT_CAR_GIT_FM='bold'
-export GBT_CAR_GIT_FORMAT='{ {{ Icon }} {{ Head }} {{ Status }}{{ Ahead }}{{ Behind }} }'
+export GBT_CAR_GIT_FORMAT='{ {{ Icon }} {{ Head }}{{ Stash }}{{ StatusAdded }}{{ StatusDeleted }}{{ StatusModified }}{{ StatusUntracked }}{{ StatusStaged }}{{ Ahead }}{{ Behind }} }'
 
 export GBT_CAR_HOSTNAME_FG='204'
 export GBT_CAR_HOSTNAME_FORMAT='[{{ Host }}]'

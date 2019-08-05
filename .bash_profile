@@ -177,10 +177,12 @@ function man() {
 
 complete -cf sudo
 HISTCONTROL=ignoredups:ignorespace
-HISTFILESIZE=10000
-HISTSIZE=10000
+HISTFILESIZE=9000
+HISTSIZE=9000
 HISTTIMEFORMAT="%Y-%m-%d %H:%M:%S :: "
 PROMPT_COMMAND='history -a'
+export HOMEBREW_NO_ANALYTICS=1
+export HOMEBREW_NO_AUTO_UPDATE=1
 export GREP_OPTIONS='--color=auto'
 export CLICOLOR=1
 export CLICOLOR_FORCE=1
@@ -217,18 +219,19 @@ alias sshpass='ssh -o PreferredAuthentications=password -o PubkeyAuthentication=
 # Git
 #-------------------------------------------------------------------------------
 
-alias gst='git status'
-alias gdf='git diff'
-alias gco='git checkout'
-alias gci='git commit'
-alias grb='git rebase'
-alias gbr='git branch'
 alias gad='git add'
 alias gada='git add -A'
+alias gbr='git branch'
+alias gci='git commit'
+alias gco='git checkout'
+alias gdf='git diff'
+alias gg='git grep'
+alias glg2='git log --date-order --all --graph --name-status --format="%C(green)%H%Creset %C(yellow)%an%Creset %C(blue bold)%ar%Creset %C(red bold)%d%Creset%s"'
+alias glg='git log --date-order --all --graph --format="%C(green)%h%Creset %C(yellow)%an%Creset %C(blue bold)%ar%Creset %C(red bold)%d%Creset%s"'
 alias gpl='git pull'
 alias gpu='git push'
-alias glg='git log --date-order --all --graph --format="%C(green)%h%Creset %C(yellow)%an%Creset %C(blue bold)%ar%Creset %C(red bold)%d%Creset%s"'
-alias glg2='git log --date-order --all --graph --name-status --format="%C(green)%H%Creset %C(yellow)%an%Creset %C(blue bold)%ar%Creset %C(red bold)%d%Creset%s"'
+alias grb='git rebase'
+alias gst='git status'
 
 
 #-------------------------------------------------------------------------------

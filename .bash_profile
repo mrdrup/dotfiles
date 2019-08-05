@@ -4,6 +4,7 @@
 # Source other bash configuration files
 [ -f ~/.bashrc ] && . ~/.bashrc
 [ -f ~/.bash_aliases ] && . ~/.bash_aliases
+[ -f ~/.bash_local ] && . ~/.bash_local
 
 # Configure shell
 shopt -s cdspell

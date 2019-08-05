@@ -5,20 +5,20 @@
 [ -f ~/.bashrc ] && . ~/.bashrc
 [ -f ~/.bash_aliases ] && . ~/.bash_aliases
 
+# Configure shell
+shopt -s cdspell
+shopt -s checkwinsize
+shopt -s dirspell
+shopt -s histappend
 
 # Brew and local changes
 export PATH="/usr/local/sbin:/usr/local/bin:~/bin:$PATH"
 
-# # Ruby
-# export PATH="$PATH:$HOME/.rbenv/bin"
-# [[ `which rbenv` ]] && eval "$(rbenv init -)"
 
-# # Python
-# export PATH="$PATH:~/Library/Python/2.7/bin/"
-
-
-### 
+#-------------------------------------------------------------------------------
 # Autocompletion
+#-------------------------------------------------------------------------------
+
 # BREW_PREFIX=$(brew --prefix)
 BREW_PREFIX=/usr/local
 
@@ -45,26 +45,15 @@ if [ ! -f $BREW_PREFIX/etc/bash_completion.d/kubectl ]; then
 fi
 
 
-# COLORS
-clNorm="\e[0m"
-clRed="\x1B[01;91m"
-clGreen="\x1B[01;32m"
-clYellow="\x1B[01;93m"
-
-
-# VARIABLES
-export GREP_OPTIONS='--color=auto'
-export CLICOLOR=1
-export CLICOLOR_FORCE=1
-export LSCOLORS=ExFxCxDxBxegedabagacad
-
+#-------------------------------------------------------------------------------
+# Functions
+#-------------------------------------------------------------------------------
 
 function S() {
     # ${@: -1}         - last passed argument
     # ${@:1:$(($#-1))} - all arguments except last one
 
     sshcmd="ssh -o StrictHostKeyChecking=no -t";
-    # ! [[ ${@: -1} =~ ^- ]] && [ $# -gt 1 ] && $sshcmd ${@:1:$(($#-1))} "sudo bash -c '${@: -1}'" || $sshcmd $@ "cat /etc/motd; sudo -i";
     ! [[ ${@: -1} =~ ^- ]] && [ $# -gt 1 ] && $sshcmd ${@:1:$(($#-1))} "sudo bash -c '${@: -1}'" || $sshcmd $@ "cat /etc/motd 2>/dev/null; sudo PASSED_PARAMS=\"$(cat ~/.bash_profile_remote)\" PROMPT_COMMAND=\"eval \\\"\\\$PASSED_PARAMS\\\"; unset PROMPT_COMMAND\" bash -l";
 }
 
@@ -73,22 +62,6 @@ function S() {
 #     ! [[ ${@: -1} =~ ^- ]] && [ $# -gt 1 ] && $sshcmd ${@:1:$(($#-1))} "sudo bash -c '${@: -1}'" || $sshcmd $@ "cat /etc/motd; PASSED_PARAMS=\"$(cat ~/.bash_profile_remote)\" PROMPT_COMMAND=\"eval \\\"\\\$PASSED_PARAMS\\\"; unset PROMPT_COMMAND\" bash -l";
 # }
 
-# function Sg() {
-#     sshcmd="ssh -o StrictHostKeyChecking=no -t";
-#     $sshcmd $@ "cat /etc/motd 2>/dev/null; GBT_CONF=\"/tmp/.gbt.$RANDOM\" && echo \"GBT_CONF=\$GBT_CONF\" >> \$GBT_CONF && echo \"$(cat ~/.gbt.ssh)\" >> \$GBT_CONF && echo \"PS1='$(source ~/.gbt.ssh; gbt)'\" >> \$GBT_CONF && sudo bash --rcfile \$GBT_CONF -i; rm -f \$GBT_CONF"
-# }
-
-# function sg() {
-#     sshcmd="ssh -o StrictHostKeyChecking=no -t";
-#     $sshcmd $@ "
-#         cat /etc/motd 2>/dev/null;
-#         GBT_CONF=\"/tmp/.gbt.$RANDOM\";
-#         echo \"$(cat ~/.gbt.ssh)\" > \$GBT_CONF &&
-#         echo \"PS1='$(source ~/.gbt.ssh; gbt)'\" >> \$GBT_CONF &&
-#         echo \"$(alias | awk '/git/ {sub(/^alias /,"", $0); print "alias "$0; exit}')\" >> \$GBT_CONF &&
-#         bash --rcfile \$GBT_CONF -i;
-#         rm -f \$GBT_CONF"
-# }
 
 function RD() {
     REMOTE_HOST=${1:-ansible@7b-stg-swarm02.mps.lan}
@@ -170,18 +143,23 @@ function pfwd() {
         lhost='127.0.0.1'
         lport=$rport
     fi
-echo     ssh -f -N -L $lhost:$lport:$rhost:$rport $shost
+    echo ssh -f -N -L $lhost:$lport:$rhost:$rport $shost
 }
 
-pls() {
-    lst=$(ps auxww | grep ssh | grep '\-L' | sed -e 's/^[a-zA-Z.]*[[:blank:]]*\([0-9]*\).*-L \([0-9a-zA-Z.-]*:[0-9a-z.-]*:[0-9a-z.-]*:[0-9a-z.-]*\) \([a-zA-Z0-9@.-]*\).*/\1 \2 \3/g')
+function pls() {
+    local clNorm="\e[0m"
+    local clRed="\x1B[01;91m"
+    local clGreen="\x1B[01;32m"
+    local clYellow="\x1B[01;93m"
+
+    local lst=$(ps auxww | grep ssh | grep '\-L' | sed -e 's/^[a-zA-Z.]*[[:blank:]]*\([0-9]*\).*-L \([0-9a-zA-Z.-]*:[0-9a-z.-]*:[0-9a-z.-]*:[0-9a-z.-]*\) \([a-zA-Z0-9@.-]*\).*/\1 \2 \3/g')
     echo -e "${clRed}PID\t${clGreen}Forwarded Ports\t\t\t${clYellow}Remote Host${clNorm}"
     while read PID FRWD HOST; do
         echo -e "${clRed}${PID}\t${clGreen}${FRWD}\t${clYellow}${HOST}${clNorm}"
     done <<< "$lst"
 }
 
-man() {
+function man() {
     env LESS_TERMCAP_mb=$'\E[01;31m' \
     LESS_TERMCAP_md=$'\E[01;38;5;74m' \
     LESS_TERMCAP_me=$'\E[0m' \
@@ -192,23 +170,32 @@ man() {
     man "$@"
 }
 
+
+#-------------------------------------------------------------------------------
+# Variables
+#-------------------------------------------------------------------------------
+
 complete -cf sudo
 HISTCONTROL=ignoredups:ignorespace
 HISTFILESIZE=10000
 HISTSIZE=10000
 HISTTIMEFORMAT="%Y-%m-%d %H:%M:%S :: "
 PROMPT_COMMAND='history -a'
-shopt -s cdspell
-shopt -s checkwinsize
-shopt -s dirspell
-shopt -s histappend
+export GREP_OPTIONS='--color=auto'
+export CLICOLOR=1
+export CLICOLOR_FORCE=1
+export LSCOLORS=ExFxCxDxBxegedabagacad
 
+
+#-------------------------------------------------------------------------------
+# All Aliases
+#-------------------------------------------------------------------------------
 
 alias .....='cd ../../../..'
 alias ....='cd ../../..'
 alias ...='cd ../..'
 alias ..='cd ..'
-alias cat='bat --decorations=never --theme OneHalfDark'
+alias cat='bat --decorations=never --theme OneHalfDark --paging=never'
 alias dec='docker exec -ti'
 alias dps='docker ps --format "table {{.ID}}\t{{.Image}}\t{{.Names}}\t{{.Status}}\t{{.Ports}}"'
 alias gmtr='mtr 8.8.8.8'
@@ -226,9 +213,10 @@ alias showFiles='defaults write com.apple.finder AppleShowAllFiles YES; killall 
 alias sshpass='ssh -o PreferredAuthentications=password -o PubkeyAuthentication=no'
 
 
-##  G I T
+#-------------------------------------------------------------------------------
+# Git
+#-------------------------------------------------------------------------------
 
-# git commamands simplified
 alias gst='git status'
 alias gdf='git diff'
 alias gco='git checkout'
@@ -243,113 +231,26 @@ alias glg='git log --date-order --all --graph --format="%C(green)%h%Creset %C(ye
 alias glg2='git log --date-order --all --graph --name-status --format="%C(green)%H%Creset %C(yellow)%an%Creset %C(blue bold)%ar%Creset %C(red bold)%d%Creset%s"'
 
 
-## R A K E
-alias brake='bundle exec rake'
+#-------------------------------------------------------------------------------
+# GBT
+#-------------------------------------------------------------------------------
 
-
-# if [ $(id -u) -eq 0 ]; then
-#     export PS1='\[\e[1;30m\]\t`if [ $? = 0 ]; then echo "\[\e[32m\] ✔ "; else echo "\[\e[0;31m\] ✘ "; fi`\[\e[0;31m\]\u\[\e[0;35m\] @ \h \[\e[1;34m\]\W \$\[\e[0m\] '
-# else
-#     export PS1='\[\e[1;30m\]\t`if [ $? = 0 ]; then echo "\[\e[32m\] ✔ "; else echo "\[\e[0;31m\] ✘ "; fi`\[\e[0;35m\][\h] \[\e[1;32m\]\W \[\e[1;33m\]$(__git_ps1 "(%s) ")\[\e[1;32m\]>\[\e[0m\] '
-# fi
-
-
-#### GBT
-export GBT_CARS='Time, Status, Hostname, Dir, Git, Sign'
-export GBT_CAR_BG='default'
-export GBT_SEPARATOR=' '
-
-export GBT_CAR_TIME_FG='dark_gray'
-export GBT_CAR_TIME_FM='bold'
-export GBT_CAR_TIME_FORMAT='{{ Time }}'
-
-export GBT_CAR_STATUS_BG='default'
-export GBT_CAR_STATUS_DISPLAY='1'
-export GBT_CAR_STATUS_ERROR_FG='red'
-export GBT_CAR_STATUS_FORMAT='{{ Symbol }}'
-export GBT_CAR_STATUS_OK_FG='green'
-
-export GBT_CAR_HOSTNAME_ADMIN_FG='light_red'
-export GBT_CAR_HOSTNAME_FG='magenta'
-export GBT_CAR_HOSTNAME_FORMAT='[{{ Host }}]'
-export GBT_CAR_HOSTNAME_USER_FG='light_green'
- 
-export GBT_CAR_DIR_FG='green'
-export GBT_CAR_DIR_FM='bold'
-export GBT_CAR_DIR_FORMAT='{{ Dir }}'
-
-export GBT_CAR_GIT_FG='light_yellow'
-export GBT_CAR_GIT_FM='bold'
-export GBT_CAR_GIT_FORMAT='({{ Head }} {{ Status }}{{ Ahead }}{{ Behind }})'
-
-# export GBT_CAR_EXECTIME_PRECISION=5
-# export GBT_CAR_EXECTIME_FG='default'
-# export GBT__SOURCE_DATE_ARG='+%s'
-# source "$BREW_PREFIX/share/gbt-git/sources/exectime/bash.sh"
-
-
-export GBT_CAR_SIGN_ADMIN_FG='red'
-export GBT_CAR_SIGN_ADMIN_TEXT='#'
-export GBT_CAR_SIGN_USER_FG='light_green'
-export GBT_CAR_SIGN_USER_TEXT='>'
-export GBT_CAR_SIGN_FORMAT='{{ Symbol }} '
-
-
+# Local
+alias docker='gbt_docker'
+alias s='gbt_ssh'
+alias screen='gbt_screen'
+alias ssu="gbt_sudo su -"
+alias vagrant='gbt_vagrant'
+source ~/.gbt/theme_local.sh
 PS1='$(gbt $?)'
 
-
-# GBT Remote
-export GBT__HOME="$BREW_PREFIX/share/gbt-git"
-export GBT__CARS_REMOTE='Status, Os, Time, Hostname, Dir, Sign'
-export GBT__PLUGINS_REMOTE='docker,screen,ssh,su,sudo'
-export GBT__SOURCE_MD5_CUT_LOCAL=4
-export GBT__SOURCE_MD5_LOCAL=md5
-export GBT__THEME_REMOTE_CARS='Status, Os, Time, Hostname, Dir, Sign'
-source $GBT__HOME/sources/gbts/cmd/local.sh
-
-
-alias docker='gbt_docker'
-alias screen='gbt_screen'
-alias s='gbt_ssh'
-alias su='gbt_su'
-alias ssu="gbt_sudo su -"
-alias sudo='gbt_sudo'
-# alias vagrant='gbt_vagrant'
-export GBT__SOURCE_MD5_LOCAL='md5'
-
-
-# export GBT__HOME='/usr/share/gbt'
-
-
-# export GBT__HOME="/usr/local/share/gbt"
-# export GBT__THEME="$HOME/.gbt_theme_remote"
-# export GBT__PROFILE="$HOME/.gbt_profile_remote"
-# source "$GBT__HOME/sources/prompt_forwarding/local"
-# alias ssh="gbt_ssh"
-# alias gbt___sudo="gbt_sudo"
-
-# alias s="gbt_ssh"
-# alias ssu="gbt_sudo su -"
-
-function S() {
-    [ -z "$GBT__HOME$GBT__PROFILE" ] && gbt__err "'GBT__HOME' not defined" && return 1
-    [ -z "$GBT__HOME$GBT__THEME" ] && gbt__err "'GBT__HOME' not defined" && return 1
-    [ -z "$GBT__PROFILE" ] && GBT__PROFILE="$GBT__HOME/sources/ssh_prompt/remote"
-    [ -z "$GBT__THEME" ] && GBT__THEME="$GBT__HOME/themes/ssh_prompt"
-
-    local SSH_BIN=$(which ${GBT__WHICH_OPTS} ssh 2>/dev/null)
-    [ $? -ne 0 ] && gbt__err "'ssh' not found" && return 1
-
-    local SSH_OPTS="-o StrictHostKeyChecking=no -t"
-    $SSH_BIN $SSH_OPTS $@ "
-        cat /etc/motd 2>/dev/null;
-        GBT__CONF=\"/tmp/.gbt.$RANDOM\" &&
-        echo \"$(base64 $GBT__PROFILE | tr -d '\r\n')\" | base64 -d > \$GBT__CONF &&
-        echo \"$(alias | awk '/gbt_/ {sub(/^(alias )|(gbt___)/,"", $0); print "alias "$0}')\" >> \$GBT__CONF &&
-        echo \"PS1='$(source $GBT__THEME; gbt)'\" >> \$GBT__CONF &&
-        sudo bash --rcfile \$GBT__CONF;
-        rm -f \$GBT__CONF"
-}
-export PATH="/usr/local/opt/mysql-client/bin:$PATH"
-alias kgp="kubectl get pods"
-alias ksgp="kubectl -n kube-system get pods"
+# Remote
+export GBT__CARS_REMOTE='Status, Os, Time, Hostname, Dir, Custom, Sign'
+export GBT__HOME="$BREW_PREFIX/opt/gbt/share/gbt"
+export GBT__PLUGINS_REMOTE='ssh,sudo'
+export GBT__SOURCE_COMPRESS='cat'
+export GBT__SOURCE_DECOMPRESS='cat'
+export GBT__SOURCE_MINIMIZE='cat'
+export GBT__THEME_SSH="$HOME/.gbt/theme_remote.sh"
+source "$GBT__HOME/sources/gbts/cmd/local.sh"
+alias gbt___dp='docker ps --format "table {{.ID}}\t{{.Image}}\t{{.Names}}\t{{.Status}}\t{{.Ports}}"'

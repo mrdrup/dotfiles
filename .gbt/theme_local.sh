@@ -1,5 +1,6 @@
 export GBT_CAR_BG='default'
-export GBT_CAR_DIR_FG='106'
+# export GBT_CAR_DIR_FG='106'
+export GBT_CAR_DIR_FG='111'
 export GBT_CAR_DIR_FM='bold'
 export GBT_CAR_DIR_FORMAT='{{ Dir }}'
 
@@ -14,10 +15,9 @@ export GBT_CAR_SIGN_ADMIN_FG="light_red"
 export GBT_CAR_SIGN_ADMIN_TEXT="#"
 export GBT_CAR_SIGN_FORMAT="{{ Symbol }} "
 export GBT_CAR_SIGN_USER_FG="106"
+export GBT_CAR_SIGN_USER_FM="bold"
 export GBT_CAR_SIGN_USER_TEXT=">"
 export GBT_CAR_SIGN_USER_TEXT=""
-
-export GBT_CAR_SIGN_USER_FM="bold"
 
 export GBT_CAR_STATUS_BG='default'
 export GBT_CAR_STATUS_DISPLAY='1'

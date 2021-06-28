@@ -20,10 +20,14 @@ export GBT_CAR_TIME_FG='dark_gray'
 export GBT_CAR_TIME_FM='bold'
 export GBT_CAR_TIME_FORMAT=' {{ Time }}'
 export GBT_SEPARATOR=''
-export GBT_CARS='Custom_iTerm_UserHost, Custom_iTerm_Dir, Os, Time, Status, Hostname, Dir, Sign'
+# export GBT_CARS='Custom_iTerm_UserHost, Custom_iTerm_Dir, Os, Time, Status, Hostname, Dir, Sign'
+export GBT_CARS='Os, Time, Status, Hostname, Dir, Sign'
 
-export GBT_CAR_CUSTOM_ITERM_USERHOST_TEXT_TEXT="\001\033]1337;RemoteHost=$USER@$HOSTNAME\007\002"
-export GBT_CAR_CUSTOM_ITERM_USERHOST_FORMAT="{{Text}}"
+#export GBT_CAR_CUSTOM_ITERM_USERHOST_TEXT_TEXT="\001\033]1337;RemoteHost=$USER@$HOSTNAME\007\002"
+#export GBT_CAR_CUSTOM_ITERM_USERHOST_FORMAT="{{Text}}"
 
-export GBT_CAR_CUSTOM_ITERM_DIR_TEXT_CMD='echo -ne "\001\033]1337;CurrentDir=$PWD\007\002"'
-export GBT_CAR_CUSTOM_ITERM_DIR_FORMAT="{{Text}}"
+#export GBT_CAR_CUSTOM_ITERM_DIR_TEXT_CMD='echo -ne "\001\033]1337;CurrentDir=$PWD\007\002"'
+#export GBT_CAR_CUSTOM_ITERM_DIR_FORMAT="{{Text}}"
+
+export GBT_SEPARATOR='\x01'
+export GBT_FORCE_HIGHER_COLORS=0

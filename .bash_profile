@@ -13,7 +13,12 @@ shopt -s dirspell
 shopt -s histappend
 
 # Brew and local changes
-export PATH="/usr/local/sbin:/usr/local/bin:~/bin:$PATH"
+export PATH="/usr/local/sbin:/usr/local/bin:~/bin:~/go/bin:$PATH"
+
+# Krew
+export PATH="${PATH}:${HOME}/.krew/bin"
+
+eval "$(pyenv init -)"
 
 
 #-------------------------------------------------------------------------------
@@ -45,6 +50,13 @@ if [ ! -f $BREW_PREFIX/etc/bash_completion.d/kubectl ]; then
     type kubectl 2&>/dev/null  && source <(kubectl completion bash)
 fi
 
+# gcloud
+#. /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.bash.inc
+
+# aliases
+for _a in $(sed '/^alias /!d;s/^alias //;s/=.*$//' ~/.bash_aliases); do
+  complete -F _complete_alias "$_a"
+done
 
 #-------------------------------------------------------------------------------
 # Functions
@@ -94,6 +106,51 @@ function kh() {
 function dkh() {
     sed -i '.bak' '/[[:<:]]'$1'[[:>:]]/d' ~/.ssh/known_hosts
 }
+
+function socks() {
+    networksetup -setsocksfirewallproxystate Wi-Fi $1
+}
+
+# Retrieve Virtual Host certificate
+function getHostCert() {
+    # getHostCert api.preprod.fusionfabric.cloud 40.85.126.186 443
+    # getHostCert api.preprod.fusionfabric.cloud 40.85.126.186:443
+    # getHostCert api.preprod.fusionfabric.cloud 40.85.126.186
+    # getHostCert api.preprod.fusionfabric.cloud
+    local virtual_host=$1
+    local server_addr=$2
+    local server_port=$3
+    [ "$server_addr" = "" ] && server_addr=$virtual_host
+    [ "$server_port" == "" ] && server_port=$(echo $server_addr| awk -F':' '{print $2}')
+    [ "$server_port" == "" ] && server_port=443
+    (set -x && \
+        openssl s_client -showcerts -servername $virtual_host -connect $server_addr:$server_port </dev/null)
+}
+
+# Curl VirtualHost on IP
+function curlHost() {
+    # curlHost https://domain.com/status 8.8.8.8 443
+    # curlHost https://api.preprod.fusionfabric.cloud 8.8.8.8:443
+    # curlHost https://api.preprod.fusionfabric.cloud 40.85.126.186
+    # curlHost https://api.preprod.fusionfabric.cloud
+    local url=$1
+    local server_host_port=$2
+    local server_port=$3
+
+    local virtual_host_port=$(echo "$url" | sed -E 's|^https?://||' | awk -F'/' '{print $1}')
+    local virtual_host=$(echo "$virtual_host_port" | awk -F ':' '{print $1}')
+
+    [ "$server_host_port" = "" ] && server_host_port=$virtual_host_port
+    local server_addr=$(echo "$server_host_port" | awk -F ':' '{print $1}')
+
+    [ "$server_port" == "" ] && server_port=$(echo "$server_host_port" | awk -F ':' '{print $2}')
+    [ "$server_port" == "" ] && server_port=443
+
+    (set -x && \
+        curl -vso /dev/null --resolve $virtual_host:$server_port:$server_addr $url)
+}
+
+
 
 # Port forwarding
 function pfwd() {
@@ -251,12 +308,15 @@ source ~/.gbt/theme_local.sh
 PS1='$(gbt $?)'
 
 # Remote
-export GBT__CARS_REMOTE='Status, Os, Time, Hostname, Dir, Custom, Sign'
 export GBT__HOME="$BREW_PREFIX/opt/gbt/share/gbt"
+# export GBT__HOME="$BREW_PREFIX/opt/gbt-git/share/gbt-git"
+export GBT__PLUGINS_REMOTE='ssh,sudo,docker'
 export GBT__PLUGINS_REMOTE='ssh,sudo'
 export GBT__SOURCE_COMPRESS='cat'
 export GBT__SOURCE_DECOMPRESS='cat'
 export GBT__SOURCE_MINIMIZE='cat'
 export GBT__THEME_SSH="$HOME/.gbt/theme_remote.sh"
 source "$GBT__HOME/sources/gbts/cmd/local.sh"
-alias gbt___dp='docker ps --format "table {{.ID}}\t{{.Image}}\t{{.Names}}\t{{.Status}}\t{{.Ports}}"'
+alias gbt___dddd='docker ps --format "table {{.ID}}\t{{.Image}}\t{{.Names}}\t{{.Status}}\t{{.Ports}}"'
+alias gbt___s='gbt_ssh'
+alias gbt___ssu='gbt_sudo su -'

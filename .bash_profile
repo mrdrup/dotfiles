@@ -116,15 +116,31 @@ function getHostCert() {
     # getHostCert api.preprod.fusionfabric.cloud 40.85.126.186 443
     # getHostCert api.preprod.fusionfabric.cloud 40.85.126.186:443
     # getHostCert api.preprod.fusionfabric.cloud 40.85.126.186
+    # getHostCert api.preprod.fusionfabric.cloud:443
     # getHostCert api.preprod.fusionfabric.cloud
     local virtual_host=$1
     local server_addr=$2
     local server_port=$3
     [ "$server_addr" = "" ] && server_addr=$virtual_host
-    [ "$server_port" == "" ] && server_port=$(echo $server_addr| awk -F':' '{print $2}')
-    [ "$server_port" == "" ] && server_port=443
+    [ "$server_port" = "" ] && server_port=$(echo $server_addr| awk -F':' '{print $2}')
+    [ "$server_port" = "" ] && server_port=443
+
+    virtual_host=$(echo $virtual_host| awk -F':' '{print $1}')
+    server_addr=$(echo $server_addr| awk -F':' '{print $1}')
+
     (set -x && \
         openssl s_client -showcerts -servername $virtual_host -connect $server_addr:$server_port </dev/null)
+}
+
+# Retrieve Virtual Host certificate
+function getHostCertDates() {
+    # getHostCertDates api.preprod.fusionfabric.cloud 40.85.126.186 443
+    # getHostCertDates api.preprod.fusionfabric.cloud 40.85.126.186:443
+    # getHostCertDates api.preprod.fusionfabric.cloud 40.85.126.186
+    # getHostCertDates api.preprod.fusionfabric.cloud:443
+    # getHostCertDates api.preprod.fusionfabric.cloud
+
+    getHostCert "$@" 2>/dev/null | openssl x509 -noout -dates
 }
 
 # Curl VirtualHost on IP
@@ -143,8 +159,8 @@ function curlHost() {
     [ "$server_host_port" = "" ] && server_host_port=$virtual_host_port
     local server_addr=$(echo "$server_host_port" | awk -F ':' '{print $1}')
 
-    [ "$server_port" == "" ] && server_port=$(echo "$server_host_port" | awk -F ':' '{print $2}')
-    [ "$server_port" == "" ] && server_port=443
+    [ "$server_port" = "" ] && server_port=$(echo "$server_host_port" | awk -F ':' '{print $2}')
+    [ "$server_port" = "" ] && server_port=443
 
     (set -x && \
         curl -vso /dev/null --resolve $virtual_host:$server_port:$server_addr $url)
